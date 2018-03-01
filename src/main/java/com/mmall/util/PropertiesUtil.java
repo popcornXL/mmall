@@ -21,7 +21,7 @@ public class PropertiesUtil {
         try {
             props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName),"UTF-8"));
         } catch (IOException e) {
-            logger.error("配置文件读取异常",e);
+            logger.error("配置文件讀取異常",e);
         }
     }
 
@@ -41,7 +41,6 @@ public class PropertiesUtil {
         }
         return value.trim();
     }
-
 
 
 }

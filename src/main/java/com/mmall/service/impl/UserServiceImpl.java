@@ -31,9 +31,9 @@ public class UserServiceImpl implements IUserService{
         if(user == null){
             return ServerResponse.createByErrorMessage("密碼錯誤");
         }
-
+        //安全性考量 清掉密碼
         user.setPassword(StringUtils.EMPTY);
-        return  ServerResponse.creatBySuccess("登入成功",user);
+        return  ServerResponse.createBySuccess("登入成功",user);
     }
 
     public ServerResponse<String> register(User user) {
@@ -52,7 +52,7 @@ public class UserServiceImpl implements IUserService{
         if (resultCount == 0) {
             return ServerResponse.createByErrorMessage("註冊失敗");
         }
-        return ServerResponse.creatBySuccessMessage("註冊成功");
+        return ServerResponse.createBySuccessMessage("註冊成功");
     }
 
     public ServerResponse<String> checkValid(String str,String type){
@@ -73,7 +73,7 @@ public class UserServiceImpl implements IUserService{
         }else{
             return  ServerResponse.createByErrorMessage("參數錯誤");
         }
-        return  ServerResponse.creatBySuccessMessage("校驗成功");
+        return  ServerResponse.createBySuccessMessage("校驗成功");
     }
 
     public  ServerResponse selectQuestion(String username){
@@ -84,7 +84,7 @@ public class UserServiceImpl implements IUserService{
         }
         String question = userMapper.selectQuestionByUsername(username);
         if(StringUtils.isNotBlank(question)){
-            return  ServerResponse.creatBySuccess(question);
+            return  ServerResponse.createBySuccess(question);
         }
         return ServerResponse.createByErrorMessage("找回密碼的問題是空的");
     }
@@ -96,7 +96,7 @@ public class UserServiceImpl implements IUserService{
             //說明問題與答案是此用戶的，且正確。
             String forgetToken = UUID.randomUUID().toString();
             TokenCache.setKey(TokenCache.TOKEN_PREFIX+username,forgetToken);
-            return  ServerResponse.creatBySuccess(forgetToken);
+            return  ServerResponse.createBySuccess(forgetToken);
         }
         return ServerResponse.createByErrorMessage("問題的答案錯誤");
     }
@@ -118,7 +118,7 @@ public class UserServiceImpl implements IUserService{
             String md5Password = MD5Util.MD5EncodeUtf8(passwordNew);
             int rowCount = userMapper.updatePasswordByUsername(username,md5Password);
             if(rowCount > 0){
-                return ServerResponse.creatBySuccessMessage("修改密碼成功");
+                return ServerResponse.createBySuccessMessage("修改密碼成功");
             }
         }
         else{
@@ -136,7 +136,7 @@ public class UserServiceImpl implements IUserService{
         user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
         int updateCount = userMapper.updateByPrimaryKeySelective(user);
         if(updateCount > 0){
-            return  ServerResponse.creatBySuccessMessage("密碼更新成功");
+            return  ServerResponse.createBySuccessMessage("密碼更新成功");
         }
         return  ServerResponse.createByErrorMessage("密碼更新失敗");
     }
@@ -146,7 +146,7 @@ public class UserServiceImpl implements IUserService{
         //email也要進行一個校驗，校驗新的email是否已存在，若與存在的email相同的話，不能被更新。
         int resultCount = userMapper.checkEmailByUserId(user.getEmail(), user.getId());
         if (resultCount > 0) {
-            return ServerResponse.creatBySuccessMessage("EMAIL重複，請更換email再嘗試更新");
+            return ServerResponse.createBySuccessMessage("EMAIL重複，請更換email再嘗試更新");
         }
         User updateUser = new User();
         updateUser.setId(user.getId());
@@ -156,7 +156,7 @@ public class UserServiceImpl implements IUserService{
         updateUser.setAnswer(user.getAnswer());
         int updateCount = userMapper.updateByPrimaryKeySelective(updateUser);
         if (updateCount > 0) {
-            return ServerResponse.creatBySuccess("更新成功", updateUser);
+            return ServerResponse.createBySuccess("更新成功", updateUser);
         }
         return ServerResponse.createByErrorMessage("更新失敗");
 
@@ -169,6 +169,17 @@ public class UserServiceImpl implements IUserService{
             return  ServerResponse.createByErrorMessage("找不到當前用戶");
         }
         user.setPassword(StringUtils.EMPTY); //不把密碼返回到http內
-        return ServerResponse.creatBySuccess(user);
+        return ServerResponse.createBySuccess(user);
     }
+
+    //backend
+
+    //檢查是否是管理員
+    public ServerResponse checkAdminRole(User user){
+        if(user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN){
+            return ServerResponse.createBySuccess();
+        }
+        return  ServerResponse.createByError();
+    }
+
 }
