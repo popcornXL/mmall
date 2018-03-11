@@ -343,16 +343,27 @@ public class OrderServiceImpl implements IOrderService{
         return orderVoList;
     }
 
+    public  ServerResponse pay(Long orderNo , Integer userId){
+        Order order = orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
+        if(order == null){
+            return ServerResponse.createByErrorMessage("用戶沒有該訂單");
+        }
+        order.setStatus(Const.OrderStatusEnum.PAID.getCode());
+        orderMapper.updateByPrimaryKeySelective(order);
+        return  ServerResponse.createBySuccess(order);
+    }
 
 
-
-
-
-
-
-
-
-
+    public ServerResponse queryOrderPayStatus(Integer userId,Long orderNo){
+        Order order = orderMapper.selectByUserIdAndOrderNo(userId,orderNo);
+        if(order == null){
+            return ServerResponse.createByErrorMessage("用戶沒有該訂單");
+        }
+        if(order.getStatus() >= Const.OrderStatusEnum.PAID.getCode()){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+    }
 
 
 
